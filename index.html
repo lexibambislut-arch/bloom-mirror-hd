@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Bloom → HD Body</title>
+<style>
+  body{font-family:system-ui,sans-serif;background:#fff5f8;color:#3b1d2a;margin:0;padding:1.25rem;line-height:1.45}
+  .card{max-width:420px;margin:0 auto;background:#fff;border:1px solid #f9a8c4;border-radius:1.2rem;padding:1.25rem;box-shadow:0 10px 40px rgba(219,39,119,.1)}
+  h1{font-size:1.35rem;margin:0 0 .5rem;color:#db2777}
+  .vals{font-size:1.1rem;background:#fdf2f8;border-radius:.8rem;padding:.9rem;margin:1rem 0}
+  .vals div{display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid #fce7f3}
+  .vals div:last-child{border:0}
+  button,.btn{display:block;width:100%;text-align:center;padding:.75rem 1rem;margin:.4rem 0;border-radius:999px;border:0;font-weight:600;cursor:pointer;text-decoration:none;box-sizing:border-box}
+  .primary{background:linear-gradient(135deg,#ec4899,#db2777);color:#fff}
+  .hint{font-size:.8rem;color:#8a5a6c;margin-top:1rem}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Bloom HD Body</h1>
+  <p>Real mesh via <b>OxiHuman BodyLab</b> (on-device). Your Bloom tapes:</p>
+  <div class="vals" id="vals"></div>
+  <button class="primary" id="copy">Copy measurements</button>
+  <a class="btn primary" id="open" href="https://cooljapan.tech/bodylab/" target="_blank" rel="noopener">Open BodyLab HD</a>
+  <p class="hint">In BodyLab: enter height / chest / waist / hip → <b>Fit body</b>. Runs in your browser only.</p>
+  <p class="hint" id="status"></p>
+</div>
+<script>
+function read(){
+  const d={height:185,chest:119,waist:103,hip:115};
+  try{
+    const q=new URLSearchParams(location.search);
+    if(q.get('height'))d.height=+q.get('height');
+    if(q.get('bust')||q.get('chest'))d.chest=+(q.get('bust')||q.get('chest'));
+    if(q.get('waist'))d.waist=+q.get('waist');
+    if(q.get('hips')||q.get('hip'))d.hip=+(q.get('hips')||q.get('hip'));
+  }catch(e){}
+  try{
+    const j=JSON.parse(localStorage.getItem('bloom_oxi_measures')||'null');
+    if(j){d.height=+(j.height_cm||j.height||d.height);d.chest=+(j.chest_cm||j.bust||d.chest);d.waist=+(j.waist_cm||j.waist||d.waist);d.hip=+(j.hip_cm||j.hips||d.hip)}
+  }catch(e){}
+  return d;
+}
+const m=read();
+document.getElementById('vals').innerHTML=
+  '<div><span>Height</span><b>'+m.height+' cm</b></div>'+
+  '<div><span>Chest / Bust</span><b>'+m.chest+' cm</b></div>'+
+  '<div><span>Waist</span><b>'+m.waist+' cm</b></div>'+
+  '<div><span>Hips</span><b>'+m.hip+' cm</b></div>';
+const text='Height '+m.height+' cm\nChest '+m.chest+' cm\nWaist '+m.waist+' cm\nHip '+m.hip+' cm';
+document.getElementById('copy').onclick=async()=>{
+  try{await navigator.clipboard.writeText(text);document.getElementById('status').textContent='Copied. Open BodyLab \u2192 enter the four numbers \u2192 Fit body.';}
+  catch(e){document.getElementById('status').textContent=text;}
+};
+</script>
+</body>
+</html>
